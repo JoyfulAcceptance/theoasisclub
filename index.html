@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oasis Catalog Terminal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #F5F0E8;
+            color: #1C1C1C;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            max-width: 700px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* SPLASH SCREEN */
+        .splash {
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .splash h1 {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .splash .field-label {
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: #506556;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            background-color: #FFF;
+            border: 1px solid #D0C9BA;
+            color: #1C1C1C;
+            padding: 10px 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #506556;
+            box-shadow: inset 0 0 3px rgba(80, 101, 86, 0.1);
+        }
+
+        button {
+            background-color: #506556;
+            color: #F5F0E8;
+            border: none;
+            padding: 10px 24px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.25s, opacity 0.25s;
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background-color: #3f4d47;
+        }
+
+        button:active {
+            opacity: 0.9;
+        }
+
+        .footer-links {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            gap: 20px;
+        }
+
+        .footer-links a {
+            color: #506556;
+            text-decoration: none;
+            transition: color 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-links a:hover {
+            color: #8A5C3D;
+        }
+
+        /* INTAKE SCREEN */
+        .intake {
+            padding: 40px 0;
+        }
+
+        .intake-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .intake-header h2 {
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .intake-header .subtitle {
+            font-size: 0.85rem;
+            color: #656565;
+        }
+
+        .card {
+            background-color: #FFF;
+            border: 1px solid #D0C9BA;
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h3 {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #506556;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .checkbox-group,
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-item,
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        input[type="checkbox"],
+        input[type="radio"] {
+            accent-color: #506556;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        .radio-item label,
+        .checkbox-item label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .inline-input {
+            margin-left: 26px;
+            margin-top: 8px;
+        }
+
+        .inline-input input {
+            max-width: none;
+            width: 100%;
+        }
+
+        .helper-text {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 16px;
+            font-style: italic;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .intake-footer {
+            text-align: center;
+            margin-top: 32px;
+        }
+
+        /* RESULT SCREEN */
+        .result {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .result h2 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        .accession-number {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #506556;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .result-links {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .result-links a {
+            color: #506556;
+            text-decoration: none;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .result-links a:hover {
+            color: #8A5C3D;
+            border-bottom-color: #8A5C3D;
+        }
+
+        /* PLACEHOLDER SCREENS */
+        .archive,
+        .circulation,
+        .reading-room {
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .archive h2,
+        .circulation h2,
+        .reading-room h2 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+
+        .placeholder-content {
+            font-style: italic;
+            color: #999;
+            margin-bottom: 30px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #506556;
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #8A5C3D;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .splash h1 {
+                font-size: 1.4rem;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .result-links {
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SPLASH SCREEN -->
+    <div class="screen splash active">
+        <h1>Enter your Member Number</h1>
+        <div class="field-label">Accession field 001</div>
+        <div class="input-group">
+            <input type="text" id="memberNumber" placeholder="Member ID" />
+            <button onclick="goToIntake()">Retrieve Record</button>
+        </div>
+        <div class="footer-links">
+            <a href="#archive">Work Archive</a>
+            <a href="#circulation">Artifact Circulation Desk</a>
+        </div>
+    </div>
+
+    <!-- INTAKE SCREEN -->
+    <div class="screen intake" id="intakeScreen">
+        <div class="intake-header">
+            <h2>Oasis Catalog Terminal</h2>
+            <p class="subtitle">Record Retrieval — Classification Cards</p>
+        </div>
+
+        <!-- CARD 1: SUBJECT HEADINGS -->
+        <div class="card">
+            <h3>Card 1 — Subject Headings</h3>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="subj1" value="Phenomenology" />
+                    <label for="subj1">Phenomenology</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="subj2" value="Systems Theory" />
+                    <label for="subj2">Systems Theory</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="subj3" value="Ethics & Human Rights" />
+                    <label for="subj3">Ethics & Human Rights</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="subj4" value="Information Studies" />
+                    <label for="subj4">Information Studies</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="subj5" value="Material Culture" />
+                    <label for="subj5">Material Culture</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="subj6" value="Linguistics" />
+                    <label for="subj6">Linguistics</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="subj7" value="Meditation & Consciousness" />
+                    <label for="subj7">Meditation & Consciousness</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="subj8" value="Ecology" />
+                    <label for="subj8">Ecology</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="subj9" value="Computational Inquiry" />
+                    <label for="subj9">Computational Inquiry</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="subj10" value="Folklore & Myth" />
+                    <label for="subj10">Folklore & Myth</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="subjOther" />
+                    <label for="subjOther">Other:</label>
+                </div>
+                <div class="inline-input" id="subjOtherInput" style="display:none;">
+                    <input type="text" id="subjOtherText" placeholder="Specify other subject" />
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 2: LANGUAGES CONSULTED -->
+        <div class="card">
+            <h3>Card 2 — Languages Consulted</h3>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="lang1" value="English" />
+                    <label for="lang1">English</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="lang2" value="French" />
+                    <label for="lang2">French</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="lang3" value="Danish" />
+                    <label for="lang3">Danish</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="lang4" value="Spanish" />
+                    <label for="lang4">Spanish</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="langOther" />
+                    <label for="langOther">Other:</label>
+                </div>
+                <div class="inline-input" id="langOtherInput" style="display:none;">
+                    <input type="text" id="langOtherText" placeholder="Specify other language" />
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 3: MODES OF INQUIRY -->
+        <div class="card">
+            <h3>Card 3 — Modes of Inquiry</h3>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mode1" value="Analytic" />
+                    <label for="mode1">Analytic</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mode2" value="Observational / Field Notes" />
+                    <label for="mode2">Observational / Field Notes</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mode3" value="Poetic" />
+                    <label for="mode3">Poetic</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mode4" value="Historical" />
+                    <label for="mode4">Historical</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mode5" value="Comparative" />
+                    <label for="mode5">Comparative</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mode6" value="Intuitive" />
+                    <label for="mode6">Intuitive</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="mode7" value="Computational / Structural" />
+                    <label for="mode7">Computational / Structural</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 4: ORIGIN NODE -->
+        <div class="card">
+            <h3>Card 4 — Origin Node</h3>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" id="origin1" name="origin" value="eBay" />
+                    <label for="origin1">eBay</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" id="origin2" name="origin" value="Etsy" />
+                    <label for="origin2">Etsy</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" id="origin3" name="origin" value="Referral" />
+                    <label for="origin3">Referral</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" id="origin4" name="origin" value="Search" />
+                    <label for="origin4">Search</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" id="origin5" name="origin" value="Field Notes" />
+                    <label for="origin5">Field Notes</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" id="origin6" name="origin" value="Unknown" />
+                    <label for="origin6">Unknown</label>
+                </div>
+            </div>
+            <div style="margin-top: 16px;">
+                <input type="text" id="identifier" placeholder="Identifier (optional)" />
+            </div>
+            <p class="helper-text">Marketplace username, order code, or other provenance tag.</p>
+        </div>
+
+        <!-- CARD 5: PROVENANCE NOTE -->
+        <div class="card">
+            <h3>Card 5 — Provenance Note</h3>
+            <textarea id="provenance" placeholder="Name an artifact, idea, or moment that stayed with you."></textarea>
+        </div>
+
+        <div class="intake-footer">
+            <button onclick="generateCatalogRecord()">Generate Catalog Record</button>
+        </div>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div class="screen result" id="resultScreen">
+        <h2>Catalog Record Generated</h2>
+        <div class="accession-number" id="accessionDisplay">Accession #0000</div>
+        <div class="result-links">
+            <a href="#archive">Enter the Archive</a>
+            <a href="#circulation">Visit Circulation Desk</a>
+            <a href="#reading-room">Continue to Reading Room</a>
+        </div>
+    </div>
+
+    <!-- WORK ARCHIVE (Portfolio) -->
+    <div class="screen archive" id="archiveScreen">
+        <h2>Work Archive</h2>
+        <div class="placeholder-content">
+            Portfolio section — future home of projects, case studies, and curated work.
+        </div>
+        <a href="#splash" class="back-link">← Return to Catalog</a>
+    </div>
+
+    <!-- ARTIFACT CIRCULATION DESK (Store) -->
+    <div class="screen circulation" id="circulationScreen">
+        <h2>Artifact Circulation Desk</h2>
+        <div class="placeholder-content">
+            Oasis Store — future home of curated objects, editions, and merchandise.
+        </div>
+        <a href="#splash" class="back-link">← Return to Catalog</a>
+    </div>
+
+    <!-- READING ROOM (Rate Card) -->
+    <div class="screen reading-room" id="readingRoomScreen">
+        <h2>Reading Room</h2>
+        <div class="placeholder-content">
+            Rate Card — future home of services, consultations, and offerings.
+        </div>
+        <a href="#splash" class="back-link">← Return to Catalog</a>
+    </div>
+
+    <script>
+        // Screen navigation
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function goToIntake() {
+            const member = document.getElementById('memberNumber').value.trim();
+            if (member === '') {
+                alert('Please enter a member number');
+                return;
+            }
+            showScreen('intakeScreen');
+        }
+
+        function generateCatalogRecord() {
+            // Collect form data
+            const formData = {
+                member: document.getElementById('memberNumber').value,
+                subjects: [],
+                languages: [],
+                modes: [],
+                origin: document.querySelector('input[name="origin"]:checked')?.value || 'Unknown',
+                identifier: document.getElementById('identifier').value,
+                provenance: document.getElementById('provenance').value
+            };
+
+            // Gather checkboxes
+            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                const val = cb.value;
+                if (cb.id.startsWith('subj')) formData.subjects.push(val);
+                if (cb.id.startsWith('lang')) formData.languages.push(val);
+                if (cb.id.startsWith('mode')) formData.modes.push(val);
+            });
+
+            // Add "Other" fields if checked
+            if (document.getElementById('subjOther').checked && document.getElementById('subjOtherText').value) {
+                formData.subjects.push(document.getElementById('subjOtherText').value);
+            }
+            if (document.getElementById('langOther').checked && document.getElementById('langOtherText').value) {
+                formData.languages.push(document.getElementById('langOtherText').value);
+            }
+
+            // Generate accession number
+            const accessionNum = Math.floor(Math.random() * 90000) + 10000;
+            document.getElementById('accessionDisplay').textContent = `Accession #${accessionNum}`;
+
+            // Store data in sessionStorage for potential future use
+            sessionStorage.setItem('catalogRecord', JSON.stringify(formData));
+
+            showScreen('resultScreen');
+        }
+
+        // Handle "Other" checkbox toggles
+        document.getElementById('subjOther').addEventListener('change', function() {
+            document.getElementById('subjOtherInput').style.display = this.checked ? 'block' : 'none';
+        });
+        document.getElementById('langOther').addEventListener('change', function() {
+            document.getElementById('langOtherInput').style.display = this.checked ? 'block' : 'none';
+        });
+
+        // Hash-based navigation
+        window.addEventListener('hashchange', handleRoute);
+
+        function handleRoute() {
+            const hash = window.location.hash.slice(1) || 'splash';
+            const screenMap = {
+                'splash': 'splash',
+                'intake': 'intakeScreen',
+                'result': 'resultScreen',
+                'archive': 'archiveScreen',
+                'circulation': 'circulationScreen',
+                'reading-room': 'readingRoomScreen'
+            };
+            const screenId = screenMap[hash] || 'splash';
+            showScreen(screenId);
+        }
+
+        // Allow Enter key on member number input
+        document.getElementById('memberNumber').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') goToIntake();
+        });
+
+        // Initialize
+        window.location.hash = '#splash';
+    </script>
+
+</body>
+</html>
